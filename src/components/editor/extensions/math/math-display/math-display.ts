@@ -1,76 +1,38 @@
+import { Node, mergeAttributes } from "@tiptap/react";
 import {
-  InputRule,
-  Node,
-  ReactNodeViewRenderer,
-  mergeAttributes,
-} from "@tiptap/react";
-import { MathDisplayComponent } from "./MathDisplayComponents";
-
-declare module "@tiptap/core" {
-  interface Commands<ReturnType> {
-    mathDisplay: {
-      toggleMathDisplay: () => ReturnType;
-    };
-  }
-}
-
-const name = "mathDisplay";
-const tag = "math-display";
+  mathPlugin,
+  makeBlockMathInputRule,
+  REGEX_BLOCK_MATH_DOLLARS,
+} from "@benrbray/prosemirror-math";
+import { inputRules } from "@tiptap/pm/inputrules";
 
 export const MathDisplay = Node.create({
-  name,
+  name: "math_display",
   group: "block math",
-  content: "text*",
-  atom: true,
-  selectable: true,
+  content: "text*", // important!
+  atom: true, // important!
   code: true,
 
   parseHTML() {
-    return [{ tag }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return [tag, mergeAttributes({ class: "math-node" }, HTMLAttributes), 0];
-  },
-
-  addAttributes() {
-    return {
-      latex: {
-        default: "x^2",
-      },
-    };
-  },
-
-  addNodeView() {
-    return ReactNodeViewRenderer(MathDisplayComponent);
-  },
-
-  addInputRules() {
     return [
-      new InputRule({
-        find: /^(\$\$)[\s]$/,
-        handler: ({ state, range }) => {
-          const { tr } = state;
-          const start = range.from;
-          const end = range.to;
-
-          tr.insert(start - 1, this.type.create()).delete(
-            tr.mapping.map(start),
-            tr.mapping.map(end),
-          );
-        },
-      }),
+      {
+        tag: "math-display", // important!
+      },
     ];
   },
 
-  addCommands() {
-    return {
-      toggleMathDisplay:
-        () =>
-        ({ commands }) => {
-          commands.insertContent("<p></p>");
-          return commands.toggleNode(this.name, "paragraph");
-        },
-    };
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "math-display",
+      mergeAttributes({ class: "math-node" }, HTMLAttributes),
+      0,
+    ];
+  },
+
+  addProseMirrorPlugins() {
+    const inputRulePlugin = inputRules({
+      rules: [makeBlockMathInputRule(REGEX_BLOCK_MATH_DOLLARS, this.type)],
+    });
+    return [mathPlugin, inputRulePlugin];
   },
 });

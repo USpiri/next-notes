@@ -1,86 +1,38 @@
+import { Node, mergeAttributes } from "@tiptap/react";
 import {
-  Content,
-  InputRule,
-  Node,
-  ReactNodeViewRenderer,
-  mergeAttributes,
-} from "@tiptap/react";
-import { MathInlineComponent } from "./MathInlineComponent";
-
-declare module "@tiptap/core" {
-  interface Commands<ReturnType> {
-    mathInline: {
-      toggleMathInline: (attributes?: { latex: string }) => ReturnType;
-    };
-  }
-}
-
-const name = "mathInline";
-const tag = "math-inline";
-const inputRule = /\$([^\s])([^$]*)\$/;
+  REGEX_INLINE_MATH_DOLLARS,
+  makeInlineMathInputRule,
+} from "@benrbray/prosemirror-math";
+import { inputRules } from "@tiptap/pm/inputrules";
 
 export const MathInline = Node.create({
-  name,
+  name: "math_inline",
   group: "inline math",
+  content: "text*", // important!
+  atom: true, // important!
+  code: true,
   inline: true,
-  selectable: true,
-  atom: true,
-  content: "text*",
 
   parseHTML() {
-    return [{ tag }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return [tag, mergeAttributes({ class: "math-node" }, HTMLAttributes), 0];
-  },
-
-  addInputRules() {
     return [
-      new InputRule({
-        find: inputRule,
-        handler: (props) => {
-          if (props.match[1].startsWith("$")) return;
-          const latex = props.match[1] + props.match[2];
-          const content: Content = [{ type: name, attrs: { latex } }];
-
-          // Add attrs
-          props
-            .chain()
-            .insertContentAt(
-              { from: props.range.from, to: props.range.to },
-              content,
-              { updateSelection: true },
-            )
-            .run();
-        },
-      }),
+      {
+        tag: "math-inline", // important!
+      },
     ];
   },
 
-  addAttributes() {
-    return {
-      latex: {
-        default: "x",
-        parseHTML: (element) => element.getAttribute("data-latex"),
-        renderHTML: (attributres) => ({ "data-latex": attributres.latex }),
-      },
-    };
+  renderHTML({ HTMLAttributes }) {
+    return [
+      "math-inline",
+      mergeAttributes({ class: "math-node" }, HTMLAttributes),
+      0,
+    ];
   },
 
-  addNodeView() {
-    return ReactNodeViewRenderer(MathInlineComponent);
-  },
-
-  addCommands() {
-    return {
-      toggleMathInline:
-        (atributtes) =>
-        ({ commands }) => {
-          console.log(atributtes);
-
-          return commands.wrapIn(this.type, atributtes);
-        },
-    };
+  addProseMirrorPlugins() {
+    const inputRulePlugin = inputRules({
+      rules: [makeInlineMathInputRule(REGEX_INLINE_MATH_DOLLARS, this.type)],
+    });
+    return [inputRulePlugin];
   },
 });

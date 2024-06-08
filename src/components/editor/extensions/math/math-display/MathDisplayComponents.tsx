@@ -1,7 +1,6 @@
 import { NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import React, { ChangeEvent, useEffect, KeyboardEvent, useState } from "react";
 import katex from "katex";
-import "katex/dist/katex.min.css";
 import { cn } from "@/lib/utils";
 
 export const MathDisplayComponent = (props: NodeViewProps) => {

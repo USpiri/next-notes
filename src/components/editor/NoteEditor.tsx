@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import { BubbleMenu } from "./BubbleMenu";
 import { EditorMenu } from "./EditorMenu";
 import "./editor.css";
+import "katex/dist/katex.min.css";
 import { CalloutExtension } from "./extensions/callout/callout";
 import { Image } from "./extensions/image-block/image-block";
 import lowlight from "./extensions/lowlight-codeblock/lowlight";

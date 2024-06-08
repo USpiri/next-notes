@@ -63,3 +63,96 @@ blockquote {
     }
   }
 }
+
+.math-node {
+  min-width: 1em;
+  min-height: 1em;
+  font-family: "Consolas", "Ubuntu Mono", monospace;
+  cursor: auto;
+}
+
+.math-node.empty-math .math-render::before {
+  content: "(empty)";
+  @apply font-semibold text-rose-400;
+}
+
+.math-node .math-render.parse-error::before {
+  content: "(math error)";
+  @apply font-semibold text-rose-400;
+}
+
+.math-node.ProseMirror-selectednode {
+  outline: none;
+  @apply rounded bg-[#050505];
+}
+
+.math-node .math-src {
+  display: none;
+  @apply font-semibold text-neutral-400;
+  tab-size: 4;
+}
+
+.math-node.ProseMirror-selectednode .math-src {
+  display: inline;
+  .ProseMirror-focused {
+    @apply outline-none;
+  }
+}
+.math-node.ProseMirror-selectednode .math-render {
+  display: none;
+}
+
+/* -- Inline Math --------------------------------------- */
+
+math-inline {
+  display: inline;
+  white-space: nowrap;
+}
+
+math-inline .math-render {
+  display: inline-block;
+  font-size: 0.85em;
+  cursor: pointer;
+}
+
+math-inline .math-src .ProseMirror {
+  display: inline;
+  /* Necessary to fix FireFox bug with contenteditable, https://bugzilla.mozilla.org/show_bug.cgi?id=1252108 */
+  border-right: 1px solid transparent;
+  border-left: 1px solid transparent;
+}
+
+math-inline .math-src::after,
+math-inline .math-src::before {
+  content: "$";
+  @apply text-neutral-500;
+}
+
+/* -- Block Math ---------------------------------------- */
+
+math-display {
+  display: block;
+  margin-block: 1.25rem;
+}
+
+math-display .math-render {
+  display: block;
+}
+
+math-display .math-src .ProseMirror {
+  width: 100%;
+  display: block;
+}
+
+math-display .math-src::after,
+math-display .math-src::before {
+  content: "$$";
+  text-align: left;
+  @apply text-neutral-500;
+}
+
+/* -- Selection Plugin ---------------------------------- */
+
+.katex-html *::selection {
+  background-color: none !important;
+}
